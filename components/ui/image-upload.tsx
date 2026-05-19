@@ -11,6 +11,64 @@ interface ImageUploadProps {
     folder?: string;
 }
 
+const compressImage = async (file: File, maxDimension = 1080): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new window.Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    resolve(file); // fallback
+                    return;
+                }
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Default to webp or jpeg to ensure compression takes place
+                const type = file.type === "image/png" ? "image/jpeg" : file.type;
+                
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            resolve(file); // fallback
+                            return;
+                        }
+                        const newFileName = file.name.replace(/\.[^/.]+$/, "") + (type === "image/jpeg" ? ".jpg" : ".webp");
+                        const newFile = new File([blob], newFileName, {
+                            type: type,
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    },
+                    type,
+                    0.8 // 80% quality
+                );
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+};
+
 export function ImageUpload({
     onUpload,
     existingUrl,
@@ -30,8 +88,8 @@ export function ImageUpload({
             setError("Please select an image file");
             return;
         }
-        if (file.size > 5 * 1024 * 1024) {
-            setError("Image must be under 5MB");
+        if (file.size > 50 * 1024 * 1024) {
+            setError("Image must be under 50MB");
             return;
         }
 
@@ -39,13 +97,16 @@ export function ImageUpload({
         setError(null);
 
         try {
+            // Compress the image to max 1080p
+            const compressedFile = await compressImage(file, 1080);
+            
             const supabase = createClient();
-            const ext = file.name.split(".").pop();
+            const ext = compressedFile.name.split(".").pop();
             const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
             const { data, error: uploadError } = await supabase.storage
                 .from("place-images")
-                .upload(fileName, file, {
+                .upload(fileName, compressedFile, {
                     cacheControl: "3600",
                     upsert: false,
                 });
@@ -84,7 +145,7 @@ export function ImageUpload({
             />
 
             {preview ? (
-                <div className="relative rounded-xl overflow-hidden" style={{ border: "1.5px solid #e0dcc0" }}>
+                <div className="relative rounded-xl overflow-hidden" style={{ border: "1px solid var(--border)" }}>
                     <Image
                         src={preview}
                         alt="Upload preview"
@@ -95,10 +156,10 @@ export function ImageUpload({
                     />
                     <button
                         onClick={handleRemove}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-background/60 hover:bg-background/90"
+                        style={{ backgroundColor: "var(--card)" }}
                     >
-                        <X size={14} className="text-white" />
+                        <X size={14} className="text-foreground" />
                     </button>
                 </div>
             ) : (
@@ -106,17 +167,17 @@ export function ImageUpload({
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     disabled={uploading}
-                    className="w-full h-40 rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
+                    className="w-full h-40 rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:bg-muted/50"
                     style={{
-                        backgroundColor: "rgba(255,255,255,0.4)",
-                        border: "2px dashed #d0cca0",
-                        color: "#999",
+                        backgroundColor: "transparent",
+                        border: "1px dashed var(--border)",
+                        color: "var(--muted-foreground)",
                     }}
                 >
                     {uploading ? (
                         <>
                             <Loader2 size={24} className="animate-spin" />
-                            <span className="text-xs">Uploading...</span>
+                            <span className="text-xs">Compressing & Uploading...</span>
                         </>
                     ) : (
                         <>
@@ -124,14 +185,14 @@ export function ImageUpload({
                             <span className="text-xs font-medium">
                                 Click to upload image
                             </span>
-                            <span className="text-[10px]">PNG, JPG up to 5MB</span>
+                            <span className="text-[10px]">Auto-compresses to 1080p</span>
                         </>
                     )}
                 </button>
             )}
 
             {error && (
-                <p className="text-xs mt-1.5" style={{ color: "#e11d48" }}>
+                <p className="text-xs mt-1.5" style={{ color: "var(--destructive)" }}>
                     {error}
                 </p>
             )}

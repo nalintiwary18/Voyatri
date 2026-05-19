@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Globe, Lock, Heart, Bookmark, Trash2, Share2 } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Heart, Bookmark, Trash2, Share2, MapPin } from "lucide-react";
 import type { Deck, DeckItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -103,7 +103,7 @@ export default function DeckDetailPage({
             <div className="flex items-center justify-center h-full">
                 <div
                     className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{ borderColor: "#7445D6", borderTopColor: "transparent" }}
+                    style={{ borderColor: "var(--primary)", borderTopColor: "transparent" }}
                 />
             </div>
         );
@@ -115,22 +115,22 @@ export default function DeckDetailPage({
     const items = (deck.items ?? []) as DeckItem[];
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-background">
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0">
+            <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0 border-b border-border shadow-sm bg-card/50">
                 <button
                     onClick={() => router.back()}
-                    className="p-1.5 rounded-lg transition-colors"
-                    style={{ color: "#666" }}
+                    className="p-2 rounded-full transition-colors hover:bg-muted"
+                    style={{ color: "var(--muted-foreground)" }}
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} strokeWidth={2.5} />
                 </button>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-bold text-lg truncate" style={{ color: "#333" }}>
+                <div className="flex-1 min-w-0 py-1">
+                    <h1 className="font-bold text-lg truncate tracking-tight" style={{ color: "var(--foreground)" }}>
                         {deck.title}
                     </h1>
                     {deck.description && (
-                        <p className="text-xs truncate" style={{ color: "#888" }}>
+                        <p className="text-sm truncate" style={{ color: "var(--muted-foreground)" }}>
                             {deck.description}
                         </p>
                     )}
@@ -138,21 +138,19 @@ export default function DeckDetailPage({
                 {isOwner && (
                     <button
                         onClick={handleTogglePublic}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-all shadow-sm"
                         style={{
-                            backgroundColor: deck.is_public
-                                ? "rgba(116, 69, 214, 0.1)"
-                                : "rgba(0,0,0,0.05)",
-                            color: deck.is_public ? "#7445D6" : "#999",
+                            backgroundColor: deck.is_public ? "var(--primary)" : "var(--secondary)",
+                            color: deck.is_public ? "var(--primary-foreground)" : "var(--secondary-foreground)",
                         }}
                     >
                         {deck.is_public ? (
                             <>
-                                <Globe size={12} /> Public
+                                <Globe size={12} strokeWidth={2.5} /> PUBLIC
                             </>
                         ) : (
                             <>
-                                <Lock size={12} /> Private
+                                <Lock size={12} strokeWidth={2.5} /> PRIVATE
                             </>
                         )}
                     </button>
@@ -160,21 +158,21 @@ export default function DeckDetailPage({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4 px-4 py-2 flex-shrink-0">
+            <div className="flex items-center gap-4 px-4 py-3 flex-shrink-0">
                 <button
                     onClick={handleLike}
-                    className="flex items-center gap-1 text-sm transition-colors"
-                    style={{ color: deck.is_liked ? "#e11d48" : "#999" }}
+                    className="flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-destructive"
+                    style={{ color: deck.is_liked ? "var(--destructive)" : "var(--muted-foreground)" }}
                 >
-                    <Heart size={18} fill={deck.is_liked ? "#e11d48" : "none"} />
+                    <Heart size={18} fill={deck.is_liked ? "var(--destructive)" : "none"} />
                     <span>{deck.likes_count ?? 0}</span>
                 </button>
                 <button
                     onClick={handleSave}
-                    className="flex items-center gap-1 text-sm transition-colors"
-                    style={{ color: deck.is_saved ? "#7445D6" : "#999" }}
+                    className="flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary"
+                    style={{ color: deck.is_saved ? "var(--primary)" : "var(--muted-foreground)" }}
                 >
-                    <Bookmark size={18} fill={deck.is_saved ? "#7445D6" : "none"} />
+                    <Bookmark size={18} fill={deck.is_saved ? "var(--primary)" : "none"} />
                     <span>{deck.saves_count ?? 0}</span>
                 </button>
             </div>
@@ -183,8 +181,7 @@ export default function DeckDetailPage({
             <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-20">
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <span className="text-3xl mb-2">🏗️</span>
-                        <p className="text-sm" style={{ color: "#888" }}>
+                        <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
                             This deck is empty. Add places from the home page!
                         </p>
                     </div>
@@ -196,25 +193,28 @@ export default function DeckDetailPage({
                                 const place = item.place ?? item.user_place;
                                 if (!place) return null;
 
-                                const image =
-                                    "images" in place
-                                        ? (place as { images?: { image_url: string }[] })?.images?.[0]
-                                            ?.image_url
-                                        : undefined;
+                                let image: string | undefined;
+                                if ("place_images" in (place as any)) {
+                                    const imgs = (place as any).place_images ?? [];
+                                    const primary = imgs.find((im: any) => im.is_primary)?.image_url;
+                                    image = primary ?? imgs[0]?.image_url;
+                                } else if ("image_url" in (place as any)) {
+                                    image = (place as any).image_url ?? undefined;
+                                }
 
                                 return (
                                     <div
                                         key={item.id}
-                                        className="flex items-center gap-3 p-3 rounded-xl transition-all"
+                                        className="flex items-center gap-3 p-3.5 rounded-2xl transition-all shadow-sm hover:shadow-md"
                                         style={{
-                                            backgroundColor: "rgba(255,255,255,0.5)",
-                                            border: "1.5px solid #e0dcc0",
+                                            backgroundColor: "var(--card)",
+                                            border: "1px solid var(--border)",
                                         }}
                                     >
                                         {/* Thumbnail */}
                                         <div
-                                            className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden"
-                                            style={{ backgroundColor: "#e8e4c0" }}
+                                            className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden"
+                                            style={{ backgroundColor: "var(--secondary)" }}
                                         >
                                             {image ? (
                                                 <Image
@@ -225,38 +225,40 @@ export default function DeckDetailPage({
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xl">
-                                                    📍
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <MapPin size={24} style={{ color: "var(--muted-foreground)" }} />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Info */}
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
                                             <h3
-                                                className="font-medium text-sm truncate"
-                                                style={{ color: "#333" }}
+                                                className="font-bold text-sm truncate"
+                                                style={{ color: "var(--foreground)" }}
                                             >
                                                 {place.name}
                                             </h3>
                                             {place.location && (
                                                 <p
                                                     className="text-xs truncate mt-0.5"
-                                                    style={{ color: "#888" }}
+                                                    style={{ color: "var(--muted-foreground)" }}
                                                 >
                                                     {place.location}
                                                 </p>
                                             )}
                                             {item.user_place_id && (
-                                                <span
-                                                    className="text-[10px] px-1.5 py-0.5 rounded-full mt-1 inline-block"
-                                                    style={{
-                                                        backgroundColor: "rgba(245, 158, 11, 0.1)",
-                                                        color: "#f59e0b",
-                                                    }}
-                                                >
-                                                    User Place
-                                                </span>
+                                                <div>
+                                                    <span
+                                                        className="text-[10px] font-bold px-2 py-0.5 rounded-full mt-2 inline-block uppercase tracking-wider"
+                                                        style={{
+                                                            backgroundColor: "rgba(245, 158, 11, 0.15)",
+                                                            color: "#d97706",
+                                                        }}
+                                                    >
+                                                        User Place
+                                                    </span>
+                                                </div>
                                             )}
                                         </div>
 
@@ -264,10 +266,11 @@ export default function DeckDetailPage({
                                         {isOwner && (
                                             <button
                                                 onClick={() => handleRemoveItem(item.id)}
-                                                className="p-1.5 rounded-lg transition-colors"
-                                                style={{ color: "#ccc" }}
+                                                className="p-2 rounded-full transition-colors hover:bg-destructive/10"
+                                                style={{ color: "var(--muted-foreground)" }}
+                                                title="Remove place"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={16} className="hover:text-destructive transition-colors" />
                                             </button>
                                         )}
                                     </div>

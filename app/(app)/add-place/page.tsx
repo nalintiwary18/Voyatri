@@ -69,12 +69,12 @@ export default function AddPlacePage() {
             <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0">
                 <button
                     onClick={() => router.back()}
-                    className="p-1.5 rounded-lg transition-colors"
-                    style={{ color: "#666" }}
+                    className="p-1.5 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+                    style={{ color: "var(--muted-foreground)" }}
                 >
                     <ArrowLeft size={20} />
                 </button>
-                <h1 className="font-bold text-lg" style={{ color: "#333" }}>
+                <h1 className="font-bold text-lg" style={{ color: "var(--foreground)" }}>
                     Add a Place
                 </h1>
             </div>
@@ -82,11 +82,10 @@ export default function AddPlacePage() {
             <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-20">
                 {success ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <span className="text-4xl mb-3">🎉</span>
-                        <h3 className="text-lg font-semibold" style={{ color: "#333" }}>
+                        <h3 className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>
                             Place added!
                         </h3>
-                        <p className="text-sm mt-1" style={{ color: "#888" }}>
+                        <p className="text-sm mt-1" style={{ color: "var(--muted-foreground)" }}>
                             You can find it in your Profile → My Places
                         </p>
                     </div>
@@ -96,8 +95,8 @@ export default function AddPlacePage() {
                             <div
                                 className="px-4 py-3 rounded-lg text-sm"
                                 style={{
-                                    backgroundColor: "rgba(225, 29, 72, 0.08)",
-                                    color: "#e11d48",
+                                    backgroundColor: "var(--destructive)",
+                                    color: "var(--destructive-foreground)",
                                 }}
                             >
                                 {error}
@@ -108,7 +107,7 @@ export default function AddPlacePage() {
                         <div>
                             <label
                                 className="block text-xs font-medium mb-1.5"
-                                style={{ color: "#555" }}
+                                style={{ color: "var(--foreground)" }}
                             >
                                 Place Name *
                             </label>
@@ -120,9 +119,9 @@ export default function AddPlacePage() {
                                 required
                                 className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
                                 style={{
-                                    backgroundColor: "rgba(255,255,255,0.6)",
-                                    border: "1.5px solid #e0dcc0",
-                                    color: "#333",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid var(--border)",
+                                    color: "var(--foreground)",
                                 }}
                             />
                         </div>
@@ -131,7 +130,7 @@ export default function AddPlacePage() {
                         <div>
                             <label
                                 className="block text-xs font-medium mb-1.5"
-                                style={{ color: "#555" }}
+                                style={{ color: "var(--foreground)" }}
                             >
                                 Location
                             </label>
@@ -139,7 +138,7 @@ export default function AddPlacePage() {
                                 <MapPin
                                     size={16}
                                     className="absolute left-3 top-1/2 -translate-y-1/2"
-                                    style={{ color: "#999" }}
+                                    style={{ color: "var(--muted-foreground)" }}
                                 />
                                 <input
                                     type="text"
@@ -148,9 +147,9 @@ export default function AddPlacePage() {
                                     placeholder="e.g. Saket, South Delhi"
                                     className="w-full rounded-xl pl-9 pr-4 py-3 text-sm outline-none transition-all"
                                     style={{
-                                        backgroundColor: "rgba(255,255,255,0.6)",
-                                        border: "1.5px solid #e0dcc0",
-                                        color: "#333",
+                                        backgroundColor: "transparent",
+                                        border: "1px solid var(--border)",
+                                        color: "var(--foreground)",
                                     }}
                                 />
                             </div>
@@ -160,7 +159,7 @@ export default function AddPlacePage() {
                         <div>
                             <label
                                 className="block text-xs font-medium mb-1.5"
-                                style={{ color: "#555" }}
+                                style={{ color: "var(--foreground)" }}
                             >
                                 Description
                             </label>
@@ -171,9 +170,9 @@ export default function AddPlacePage() {
                                 rows={3}
                                 className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-all"
                                 style={{
-                                    backgroundColor: "rgba(255,255,255,0.6)",
-                                    border: "1.5px solid #e0dcc0",
-                                    color: "#333",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid var(--border)",
+                                    color: "var(--foreground)",
                                 }}
                             />
                         </div>
@@ -182,7 +181,7 @@ export default function AddPlacePage() {
                         <div>
                             <label
                                 className="block text-xs font-medium mb-2"
-                                style={{ color: "#555" }}
+                                style={{ color: "var(--foreground)" }}
                             >
                                 Tags (select all that apply)
                             </label>
@@ -194,15 +193,15 @@ export default function AddPlacePage() {
                                             key={tag}
                                             type="button"
                                             onClick={() => toggleTag(tag)}
-                                            className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                                            className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
                                             style={{
                                                 backgroundColor: isSelected
-                                                    ? "#7445D6"
-                                                    : "rgba(116, 69, 214, 0.06)",
-                                                color: isSelected ? "white" : "#666",
+                                                    ? "var(--primary)"
+                                                    : "transparent",
+                                                color: isSelected ? "var(--primary-foreground)" : "var(--foreground)",
                                                 border: isSelected
-                                                    ? "1.5px solid #7445D6"
-                                                    : "1.5px solid #e0dcc0",
+                                                    ? "1px solid var(--primary)"
+                                                    : "1px solid var(--border)",
                                             }}
                                         >
                                             {tag.replace("_", " ")}
@@ -216,7 +215,7 @@ export default function AddPlacePage() {
                         <div>
                             <label
                                 className="block text-xs font-medium mb-1.5"
-                                style={{ color: "#555" }}
+                                style={{ color: "var(--foreground)" }}
                             >
                                 Photo
                             </label>
@@ -228,12 +227,12 @@ export default function AddPlacePage() {
                             type="submit"
                             disabled={submitting || !name.trim()}
                             className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
-                            style={{ backgroundColor: "#7445D6" }}
+                            style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)" }}
                         >
                             {submitting ? "Adding..." : "Add Place"}
                         </button>
 
-                        <p className="text-[11px] text-center" style={{ color: "#aaa" }}>
+                        <p className="text-[11px] text-center" style={{ color: "var(--muted-foreground)" }}>
                             Your place will appear in your profile. It can be added to decks
                             but won't be publicly listed until verified by an admin.
                         </p>

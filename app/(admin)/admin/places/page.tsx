@@ -67,7 +67,7 @@ export default function AdminPlacesPage() {
             <div className="flex items-center justify-center py-20">
                 <div
                     className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{ borderColor: "#7445D6", borderTopColor: "transparent" }}
+                    style={{ borderColor: "#BA160C", borderTopColor: "transparent" }}
                 />
             </div>
         );
@@ -222,8 +222,8 @@ export default function AdminPlacesPage() {
                                                     key={tag}
                                                     className="text-[10px] px-2 py-0.5 rounded-full"
                                                     style={{
-                                                        backgroundColor: "rgba(116, 69, 214, 0.08)",
-                                                        color: "#7445D6",
+                                                        backgroundColor: "rgba(186, 22, 12, 0.08)",
+                                                        color: "#BA160C",
                                                     }}
                                                 >
                                                     {tag}
@@ -254,8 +254,8 @@ export default function AdminPlacesPage() {
                                             onClick={() => startEdit(sub)}
                                             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium"
                                             style={{
-                                                backgroundColor: "rgba(116, 69, 214, 0.08)",
-                                                color: "#7445D6",
+                                                backgroundColor: "rgba(186, 22, 12, 0.08)",
+                                                color: "#BA160C",
                                             }}
                                         >
                                             <Edit3 size={14} /> Edit & Approve

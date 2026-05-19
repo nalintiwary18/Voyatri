@@ -25,28 +25,7 @@ const ALL_TAGS = [
     "photography",
 ];
 
-const TAG_EMOJIS: Record<string, string> = {
-    cafe: "☕",
-    restaurant: "🍽️",
-    bar: "🍸",
-    rooftop: "🌇",
-    romantic: "💕",
-    aesthetic: "✨",
-    heritage: "🏛️",
-    street_food: "🥘",
-    nature: "🌿",
-    nightlife: "🌙",
-    budget: "💰",
-    luxury: "💎",
-    books: "📚",
-    art: "🎨",
-    shopping: "🛍️",
-    hidden_gem: "💎",
-    study: "💻",
-    breakfast: "🥞",
-    dessert: "🍰",
-    photography: "📸",
-};
+
 
 interface TagChipsProps {
     selectedTags: string[];
@@ -65,19 +44,18 @@ export function TagChips({ selectedTags, onTagToggle }: TagChipsProps) {
                     <button
                         key={tag}
                         onClick={() => onTagToggle(tag)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0"
+                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0"
                         style={{
                             backgroundColor: isSelected
-                                ? "#7445D6"
-                                : "rgba(116, 69, 214, 0.06)",
-                            color: isSelected ? "white" : "#666",
+                                ? "var(--primary)"
+                                : "transparent",
+                            color: isSelected ? "var(--primary-foreground)" : "var(--foreground)",
                             border: isSelected
-                                ? "1.5px solid #7445D6"
-                                : "1.5px solid #e0dcc0",
+                                ? "1px solid var(--primary)"
+                                : "1px solid var(--border)",
                             scrollSnapAlign: "start",
                         }}
                     >
-                        <span>{TAG_EMOJIS[tag] ?? "🏷️"}</span>
                         <span>{tag.replace("_", " ")}</span>
                     </button>
                 );

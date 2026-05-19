@@ -30,7 +30,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-center py-20">
                 <div
                     className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{ borderColor: "#7445D6", borderTopColor: "transparent" }}
+                    style={{ borderColor: "#BA160C", borderTopColor: "transparent" }}
                 />
             </div>
         );
@@ -52,8 +52,8 @@ export default function AdminDashboardPage() {
             label: "Total Places",
             value: stats.total_places,
             icon: MapPin,
-            color: "#7445D6",
-            bg: "rgba(116, 69, 214, 0.08)",
+            color: "#BA160C",
+            bg: "rgba(186, 22, 12, 0.08)",
         },
         {
             label: "Pending Places",

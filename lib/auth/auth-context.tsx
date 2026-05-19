@@ -24,6 +24,7 @@ interface AuthContextType {
         password: string,
         displayName?: string
     ) => Promise<{ error: Error | null }>;
+    signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
 }
 
@@ -137,6 +138,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error as Error | null };
     };
 
+    const signInWithGoogle = async () => {
+        const redirectTo =
+            typeof window !== "undefined"
+                ? `${window.location.origin}/auth/callback`
+                : undefined;
+        await supabaseRef.current.auth.signInWithOAuth({
+            provider: "google",
+            options: { redirectTo },
+        });
+    };
+
     const signOut = async () => {
         await supabaseRef.current.auth.signOut();
         setUser(null);
@@ -154,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 loading,
                 signIn,
                 signUp,
+                signInWithGoogle,
                 signOut,
             }}
         >

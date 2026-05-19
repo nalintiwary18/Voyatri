@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import type { Place } from "@/types";
-import { Trash2, Save, Search } from "lucide-react";
-
+import { Trash2, Save, Search, X } from "lucide-react";
+import { ImageUpload } from "@/components/ui/image-upload";
 export default function AdminDatabasePage() {
     const [places, setPlaces] = useState<Place[]>([]);
     const [loading, setLoading] = useState(true);
@@ -91,6 +91,52 @@ export default function AdminDatabasePage() {
             }
         } catch {
             console.error("Delete failed");
+        }
+    };
+
+    const handleDeleteImage = async (placeId: string, imageId: string) => {
+        if (!confirm("Permanently delete this image?")) return;
+        try {
+            const res = await fetch(`/api/admin/places/${placeId}/images/${imageId}`, {
+                method: "DELETE",
+            });
+            if (res.ok) {
+                setPlaces((prev) =>
+                    prev.map((p) =>
+                        p.id === placeId
+                            ? {
+                                  ...p,
+                                  images: p.images?.filter((img: any) => img.id !== imageId),
+                              }
+                            : p
+                    )
+                );
+            }
+        } catch {
+            console.error("Delete image failed");
+        }
+    };
+
+    const handleAddImage = async (placeId: string, url: string) => {
+        if (!url) return;
+        try {
+            const res = await fetch(`/api/admin/places/${placeId}/images`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image_url: url }),
+            });
+            if (res.ok) {
+                const newImage = await res.json();
+                setPlaces((prev) =>
+                    prev.map((p) =>
+                        p.id === placeId
+                            ? { ...p, images: [...(p.images || []), newImage] }
+                            : p
+                    )
+                );
+            }
+        } catch {
+            console.error("Add image failed");
         }
     };
 
@@ -207,7 +253,7 @@ export default function AdminDatabasePage() {
                                         }
                                         placeholder="Tags (comma separated)"
                                     />
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 mt-4">
                                         <button
                                             onClick={saveEdit}
                                             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white"
@@ -222,6 +268,46 @@ export default function AdminDatabasePage() {
                                         >
                                             Cancel
                                         </button>
+                                    </div>
+
+                                    {/* Image Management Section */}
+                                    <div className="mt-6 pt-4 border-t" style={{ borderColor: "#e0dcc0" }}>
+                                        <h4 className="text-sm font-semibold mb-3" style={{ color: "#333" }}>
+                                            Images
+                                        </h4>
+                                        
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                                            {place.images?.map((img: any) => (
+                                                <div key={img.id} className="relative rounded-lg overflow-hidden aspect-video border" style={{ borderColor: "#e0dcc0" }}>
+                                                    <img 
+                                                        src={img.image_url} 
+                                                        alt="Place" 
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <button
+                                                        onClick={() => handleDeleteImage(place.id, img.id)}
+                                                        className="absolute top-1 right-1 p-1 rounded-md bg-black/50 hover:bg-red-500/80 transition-colors text-white"
+                                                        title="Delete Image"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1.5" style={{ color: "#555" }}>
+                                                Add New Image
+                                            </label>
+                                            <ImageUpload 
+                                                onUpload={(url) => {
+                                                    if (url) {
+                                                        handleAddImage(place.id, url);
+                                                    }
+                                                }} 
+                                                folder="admin" 
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

@@ -3,16 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { PlaceCard } from "@/components/places/place-card";
-import { TagChips } from "@/components/places/tag-chips";
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import type { Place } from "@/types";
 
 export default function HomePage() {
     const [places, setPlaces] = useState<Place[]>([]);
+
+    const [searchMode, setSearchMode] = useState(false);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchMode, setSearchMode] = useState(false);
+
+    /** Sort: places with at least one image come first */
+    const sortByPhoto = (list: Place[]) =>
+        [...list].sort((a, b) => {
+            const aHas = (a.images?.length ?? 0) > 0 ? 0 : 1;
+            const bHas = (b.images?.length ?? 0) > 0 ? 0 : 1;
+            return aHas - bHas;
+        });
 
     const fetchPlaces = useCallback(async (tags: string[] = []) => {
         setLoading(true);
@@ -23,7 +29,7 @@ export default function HomePage() {
 
             const res = await fetch(`/api/places?${params}`);
             const json = await res.json();
-            setPlaces(json.data ?? []);
+            setPlaces(sortByPhoto(json.data ?? []));
         } catch (err) {
             console.error("Failed to fetch places:", err);
         } finally {
@@ -34,7 +40,7 @@ export default function HomePage() {
     const handleSearch = async (query: string) => {
         if (!query.trim()) {
             setSearchMode(false);
-            fetchPlaces(selectedTags);
+            await fetchPlaces(selectedTags);
             return;
         }
 
@@ -47,7 +53,7 @@ export default function HomePage() {
                 body: JSON.stringify({ prompt: query, limit: 30 }),
             });
             const json = await res.json();
-            setPlaces(json.places ?? []);
+            setPlaces(sortByPhoto(json.places ?? []));
         } catch (err) {
             console.error("Search failed:", err);
         } finally {
@@ -55,14 +61,6 @@ export default function HomePage() {
         }
     };
 
-    const handleTagToggle = (tag: string) => {
-        const newTags = selectedTags.includes(tag)
-            ? selectedTags.filter((t) => t !== tag)
-            : [...selectedTags, tag];
-        setSelectedTags(newTags);
-        setSearchMode(false);
-        fetchPlaces(newTags);
-    };
 
     useEffect(() => {
         fetchPlaces();
@@ -76,27 +74,23 @@ export default function HomePage() {
                 placeholder="Describe your ideal place..."
             />
 
-            {/* Tag Filter Chips */}
-            <TagChips selectedTags={selectedTags} onTagToggle={handleTagToggle} />
-
             {/* Results */}
             <div className="photo-grid-wrapper">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div
-                            className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                            style={{ borderColor: "#7445D6", borderTopColor: "transparent" }}
+                            className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
+                            style={{ borderColor: "var(--primary)", borderTopColor: "transparent" }}
                         />
                     </div>
                 ) : places.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                        <span className="text-4xl mb-3">🗺️</span>
-                        <h3 className="text-lg font-semibold" style={{ color: "#333" }}>
+                        <h3 className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>
                             {searchMode
                                 ? "No places match your vibe"
                                 : "No places yet"}
                         </h3>
-                        <p className="text-sm mt-1" style={{ color: "#888" }}>
+                        <p className="text-sm mt-1" style={{ color: "var(--muted-foreground)" }}>
                             {searchMode
                                 ? "Try a different prompt or explore tags above"
                                 : "Places will appear here once they're added to the database"}
@@ -110,16 +104,6 @@ export default function HomePage() {
                     </div>
                 )}
             </div>
-
-            {/* Floating Add Place Button */}
-            <Link
-                href="/add-place"
-                className="fixed bottom-20 right-6 md:bottom-8 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-transform hover:scale-110 z-40"
-                style={{ backgroundColor: "#7445D6" }}
-                title="Add a place"
-            >
-                <Plus size={24} strokeWidth={2.5} />
-            </Link>
         </>
     );
 }

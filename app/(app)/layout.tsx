@@ -14,7 +14,7 @@ export default function AppLayout({
             </div>
 
             {/* Content Area */}
-            <main className="content-area">
+            <main className="flex-1 h-screen flex flex-col overflow-hidden bg-background md:ml-[70px]">
                 {children}
                 {/* Bottom Navigation — visible on mobile only */}
                 <BottomNav />

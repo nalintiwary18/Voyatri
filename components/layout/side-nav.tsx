@@ -1,33 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Layers, Compass, User, Settings } from "lucide-react";
+import { Home, Layers, Compass, Plus} from "lucide-react";
+import {useAuth} from "@/lib/auth/auth-context";
+
 
 const navItems = [
     { href: "/home", icon: Home, label: "Home" },
     { href: "/decks", icon: Layers, label: "Decks" },
     { href: "/discover", icon: Compass, label: "Discover" },
-    { href: "/profile", icon: User, label: "Profile" },
+    {href: "/add-place", icon: Plus, label: "Add Place"}
 ];
 
 export function SideNav() {
+    const { profile } = useAuth();
     const pathname = usePathname();
-
+    const initials = profile?.display_name
+        ? profile.display_name.charAt(0).toUpperCase()
+        : "?";
     return (
-        <nav className="side-nav rounded-r-lg">
+        <nav className="side-nav pb-8">
             {/* Logo */}
             <div>
-                <Link href="/home">
-                    <Image
-                        src="/img.png"
-                        alt="Voyatri logo"
-                        width={36}
-                        height={40}
-                        className="logo"
-                        priority
-                    />
+                <Link href="/home" className="flex items-center justify-center pt-2">
+                    <span className="text-4xl font-[family-name:var(--font-pacifico)] text-primary">V</span>
                 </Link>
             </div>
 
@@ -41,12 +38,9 @@ export function SideNav() {
                             href={href}
                             className="relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200"
                             style={{
-                                backgroundColor: isActive
-                                    ? "rgba(255, 255, 255, 0.2)"
-                                    : "transparent",
                                 color: isActive
-                                    ? "rgba(255, 255, 255, 1)"
-                                    : "rgba(255, 255, 255, 0.5)",
+                                    ? "var(--primary)"
+                                    : "var(--muted-foreground)",
                             }}
                             title={label}
                         >
@@ -54,7 +48,7 @@ export function SideNav() {
                             {isActive && (
                                 <span
                                     className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
-                                    style={{ backgroundColor: "white" }}
+                                    style={{ backgroundColor: "var(--primary)" }}
                                 />
                             )}
                         </Link>
@@ -62,17 +56,22 @@ export function SideNav() {
                 })}
             </div>
 
-            {/* Settings */}
-            <div>
-                <Link
-                    href="/profile"
-                    className="flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
-                    style={{ color: "rgba(255, 255, 255, 0.5)" }}
-                    title="Settings"
+            {/* Actions */}
+            <Link href="/profile" className="flex flex-col items-center gap-6">
+                <div
+                    className="profile-icon flex items-center justify-center"
+                    style={{
+                        backgroundImage: profile?.avatar_url
+                            ? `url(${profile.avatar_url})`
+                            : undefined,
+                        backgroundSize: "cover",
+                    }}
                 >
-                    <Settings size={20} strokeWidth={1.8} />
-                </Link>
-            </div>
+                    {!profile?.avatar_url && (
+                        <span className="text-white text-sm font-semibold">{initials}</span>
+                    )}
+                </div>
+            </Link>
         </nav>
     );
 }

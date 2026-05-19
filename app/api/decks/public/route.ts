@@ -13,10 +13,12 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await supabase
         .from("decks")
         .select(
-            "*, deck_items(count), deck_likes(count), deck_saves(count), owner:users!decks_user_id_fkey(id, display_name, avatar_url)",
+            "*, deck_items(count), preview:deck_items(position, place:places(id, name, place_images(image_url, is_primary)), user_place:user_places(id, name, image_url)), deck_likes(count), deck_saves(count), owner:users!decks_user_id_fkey(id, display_name, avatar_url)",
             { count: "exact" }
         )
         .eq("is_public", true)
+        .order("position", { foreignTable: "preview", ascending: true })
+        .limit(3, { foreignTable: "preview" })
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
 

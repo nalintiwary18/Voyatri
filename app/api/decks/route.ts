@@ -15,11 +15,14 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
         .from("decks")
-        .select("*, deck_items(count), deck_likes(count), deck_saves(count)")
+        .select("*, deck_items(count), preview:deck_items(position, place:places(id, name, place_images(image_url, is_primary)), user_place:user_places(id, name, image_url)), deck_likes(count), deck_saves(count)")
         .eq("user_id", user.id)
+        .order("position", { foreignTable: "preview", ascending: true })
+        .limit(3, { foreignTable: "preview" })
         .order("created_at", { ascending: false });
 
     if (error) {
+        console.error("Supabase DECK GET error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

@@ -10,12 +10,13 @@ import Link from "next/link";
 type Tab = "decks" | "saved" | "places";
 
 export default function ProfilePage() {
-    const { profile, user, signOut, isAdmin } = useAuth();
+    const { profile, signOut, isAdmin } = useAuth();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<Tab>("decks");
     const [decks, setDecks] = useState<Deck[]>([]);
     const [userPlaces, setUserPlaces] = useState<UserPlace[]>([]);
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,13 +61,14 @@ export default function ProfilePage() {
         : "?";
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-background">
             {/* Profile Header */}
-            <div className="flex flex-col items-center pt-8 pb-4 px-4 flex-shrink-0">
+            <div className="flex flex-col items-center pt-10 pb-6 px-4 flex-shrink-0 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent -z-10" />
                 <div
-                    className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-3"
+                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-primary-foreground mb-4 shadow-lg ring-4 ring-background"
                     style={{
-                        backgroundColor: "#7445D6",
+                        backgroundColor: "var(--primary)",
                         backgroundImage: profile?.avatar_url
                             ? `url(${profile.avatar_url})`
                             : undefined,
@@ -75,34 +77,34 @@ export default function ProfilePage() {
                 >
                     {!profile?.avatar_url && initials}
                 </div>
-                <h1 className="text-lg font-bold" style={{ color: "#333" }}>
+                <h1 className="text-xl font-bold" style={{ color: "var(--foreground)" }}>
                     {profile?.display_name ?? "User"}
                 </h1>
-                <p className="text-xs" style={{ color: "#888" }}>
+                <p className="text-sm mt-0.5" style={{ color: "var(--muted-foreground)" }}>
                     {profile?.email}
                 </p>
 
-                {/* Admin badge + link */}
-                <div className="flex items-center gap-2 mt-3">
+                {/* Actions */}
+                <div className="flex items-center gap-3 mt-5">
                     {isAdmin && (
                         <Link
                             href="/admin"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                            style={{ backgroundColor: "#7445D6" }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-primary-foreground transition-transform hover:scale-105"
+                            style={{ backgroundColor: "var(--primary)" }}
                         >
-                            <Shield size={12} />
+                            <Shield size={14} />
                             Admin Panel
                         </Link>
                     )}
                     <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-colors hover:bg-destructive/10 hover:text-destructive"
                         style={{
-                            backgroundColor: "rgba(0,0,0,0.05)",
-                            color: "#666",
+                            backgroundColor: "var(--secondary)",
+                            color: "var(--foreground)",
                         }}
                     >
-                        <LogOut size={12} />
+                        <LogOut size={14} />
                         Sign Out
                     </button>
                 </div>
@@ -110,21 +112,20 @@ export default function ProfilePage() {
 
             {/* Tabs */}
             <div
-                className="flex border-b flex-shrink-0"
-                style={{ borderColor: "#e0dcc0" }}
+                className="flex border-b flex-shrink-0 px-2 gap-2"
+                style={{ borderColor: "var(--border)" }}
             >
                 {tabs.map(({ key, label, icon: Icon }) => (
                     <button
                         key={key}
                         onClick={() => setActiveTab(key)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-medium transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 py-3.5 text-xs font-bold transition-all"
                         style={{
-                            color: activeTab === key ? "#7445D6" : "#999",
-                            borderBottom:
-                                activeTab === key ? "2px solid #7445D6" : "2px solid transparent",
+                            color: activeTab === key ? "var(--primary)" : "var(--muted-foreground)",
+                            borderBottom: activeTab === key ? "2.5px solid var(--primary)" : "2.5px solid transparent",
                         }}
                     >
-                        <Icon size={14} />
+                        <Icon size={16} />
                         {label}
                     </button>
                 ))}
@@ -136,28 +137,75 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-center py-16">
                         <div
                             className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                            style={{ borderColor: "#7445D6", borderTopColor: "transparent" }}
+                            style={{ borderColor: "var(--primary)", borderTopColor: "transparent" }}
                         />
                     </div>
                 ) : activeTab === "decks" ? (
                     decks.length === 0 ? (
-                        <EmptyState emoji="📦" title="No decks" subtitle="Create your first deck!" />
+                        <EmptyState title="No decks" subtitle="Create your first deck!" />
                     ) : (
-                        <div className="grid gap-3">
+                        <div className="columns-2 gap-3">
                             {decks.map((deck) => (
-                                <DeckListItem key={deck.id} deck={deck} />
+                                <div
+                                    key={deck.id}
+                                    className="relative rounded-2xl overflow-hidden mb-3 break-inside-avoid shadow-sm group transition-transform hover:-translate-y-1"
+                                    style={{
+                                        backgroundColor: "var(--card)",
+                                        border: "1px solid var(--border)",
+                                    }}
+                                >
+                                    <Link href={`/decks/${deck.id}`} className="block">
+                                        <div className="flex h-40 sm:h-48 p-1 gap-1">
+                                            <div 
+                                                className="w-1/2 h-full rounded-xl overflow-hidden flex items-end justify-start p-2 relative" 
+                                                style={{ 
+                                                    backgroundColor: deck.cover_image_url ? 'transparent' : "var(--primary)",
+                                                    backgroundImage: deck.cover_image_url ? `url(${deck.cover_image_url})` : "linear-gradient(135deg, var(--primary) 0%, oklch(0.4 0.1 285) 100%)",
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center'
+                                                }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                            </div>
+                                            <div className="w-1/2 h-full flex flex-col gap-1">
+                                                <div 
+                                                    className="flex-1 rounded-xl overflow-hidden relative" 
+                                                    style={{ 
+                                                        background: "linear-gradient(135deg, var(--primary) 0%, var(--background) 100%)",
+                                                        opacity: 0.2
+                                                    }}
+                                                />
+                                                <div 
+                                                    className="flex-1 rounded-xl overflow-hidden relative" 
+                                                    style={{ 
+                                                        background: "linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%)",
+                                                        opacity: 0.4
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </Link>
+                                    <div className="px-3 pt-2 pb-3 flex flex-col">
+                                        <Link href={`/decks/${deck.id}`}>
+                                            <h3 className="font-bold text-sm tracking-tight truncate hover:underline" style={{ color: "var(--foreground)" }}>
+                                                {deck.title}
+                                            </h3>
+                                        </Link>
+                                        <span className="text-[10px] font-medium mt-0.5" style={{ color: "var(--muted-foreground)" }}>
+                                            {(deck as any).deck_items ? `${(deck as any).deck_items?.[0]?.count ?? 0} places` : "0 places"}
+                                        </span>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )
                 ) : activeTab === "saved" ? (
                     <EmptyState
-                        emoji="🔖"
                         title="No saved decks"
                         subtitle="Save decks you like from the Discover page"
                     />
                 ) : userPlaces.length === 0 ? (
                     <EmptyState
-                        emoji="📍"
                         title="No places added"
                         subtitle="Add your own places to see them here"
                     />
@@ -166,39 +214,40 @@ export default function ProfilePage() {
                         {userPlaces.map((place) => (
                             <div
                                 key={place.id}
-                                className="p-3 rounded-xl"
+                                className="p-3.5 rounded-2xl shadow-sm transition-all hover:shadow-md"
                                 style={{
-                                    backgroundColor: "rgba(255,255,255,0.5)",
-                                    border: "1.5px solid #e0dcc0",
+                                    backgroundColor: "var(--card)",
+                                    border: "1px solid var(--border)",
                                 }}
                             >
-                                <h3 className="font-medium text-sm" style={{ color: "#333" }}>
+                                <h3 className="font-bold text-sm" style={{ color: "var(--foreground)" }}>
                                     {place.name}
                                 </h3>
                                 {place.location && (
-                                    <p className="text-xs mt-0.5" style={{ color: "#888" }}>
+                                    <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
                                         {place.location}
                                     </p>
                                 )}
-                                <div className="flex items-center gap-2 mt-2">
+                                <div className="flex items-center gap-2 mt-2.5">
                                     <span
-                                        className="text-[10px] px-2 py-0.5 rounded-full"
+                                        className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
                                         style={{
                                             backgroundColor: place.is_verified
-                                                ? "rgba(34, 197, 94, 0.1)"
-                                                : "rgba(245, 158, 11, 0.1)",
-                                            color: place.is_verified ? "#22c55e" : "#f59e0b",
+                                                ? "rgba(34, 197, 94, 0.15)"
+                                                : "rgba(245, 158, 11, 0.15)",
+                                            color: place.is_verified ? "#16a34a" : "#d97706",
                                         }}
                                     >
                                         {place.is_verified ? "Verified" : "Unverified"}
                                     </span>
-                                    {place.tags.slice(0, 3).map((tag) => (
+                                    {place.tags && place.tags.slice(0, 3).map((tag) => (
                                         <span
                                             key={tag}
-                                            className="text-[10px] px-2 py-0.5 rounded-full"
+                                            className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
                                             style={{
-                                                backgroundColor: "rgba(116, 69, 214, 0.08)",
-                                                color: "#7445D6",
+                                                backgroundColor: "var(--secondary)",
+                                                color: "var(--secondary-foreground)",
+                                                border: "1px solid var(--border)",
                                             }}
                                         >
                                             {tag}
@@ -214,47 +263,19 @@ export default function ProfilePage() {
     );
 }
 
-function DeckListItem({ deck }: { deck: Deck }) {
-    return (
-        <Link
-            href={`/decks/${deck.id}`}
-            className="block p-3 rounded-xl transition-all"
-            style={{
-                backgroundColor: "rgba(255,255,255,0.5)",
-                border: "1.5px solid #e0dcc0",
-            }}
-        >
-            <h3 className="font-medium text-sm" style={{ color: "#333" }}>
-                {deck.title}
-            </h3>
-            {deck.description && (
-                <p className="text-xs mt-0.5 truncate" style={{ color: "#888" }}>
-                    {deck.description}
-                </p>
-            )}
-            <p className="text-[10px] mt-1.5" style={{ color: "#aaa" }}>
-                {new Date(deck.created_at).toLocaleDateString()}
-            </p>
-        </Link>
-    );
-}
-
 function EmptyState({
-    emoji,
     title,
     subtitle,
 }: {
-    emoji: string;
     title: string;
     subtitle: string;
 }) {
     return (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-            <span className="text-3xl mb-2">{emoji}</span>
-            <h3 className="text-sm font-semibold" style={{ color: "#333" }}>
+            <h3 className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                 {title}
             </h3>
-            <p className="text-xs mt-1" style={{ color: "#888" }}>
+            <p className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>
                 {subtitle}
             </p>
         </div>

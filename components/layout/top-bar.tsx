@@ -27,7 +27,12 @@ export function TopBar({
         : "?";
 
     return (
-        <div className="top-bar">
+        <div className="top-bar gap-3">
+            {/* Mobile V Logo */}
+            <Link href="/home" className="md:hidden flex-shrink-0 flex items-center justify-center">
+                <span className="text-3xl font-[family-name:var(--font-pacifico)] text-primary -mt-1 mr-3">V</span>
+            </Link>
+
             <form onSubmit={handleSubmit} className="search-container">
                 <Search size={16} />
                 <input
@@ -37,21 +42,6 @@ export function TopBar({
                     onChange={(e) => setQuery(e.target.value)}
                 />
             </form>
-            <Link href="/profile">
-                <div
-                    className="profile-icon flex items-center justify-center"
-                    style={{
-                        backgroundImage: profile?.avatar_url
-                            ? `url(${profile.avatar_url})`
-                            : undefined,
-                        backgroundSize: "cover",
-                    }}
-                >
-                    {!profile?.avatar_url && (
-                        <span className="text-white text-sm font-semibold">{initials}</span>
-                    )}
-                </div>
-            </Link>
         </div>
     );
 }

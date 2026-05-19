@@ -53,7 +53,10 @@ export async function GET(
         is_saved = !!save;
     }
 
-    return NextResponse.json({ ...deck, is_liked, is_saved });
+    // Normalize API shape: expose items array expected by the client UI
+    // Supabase returns `deck_items` from the select; the deck detail page reads `deck.items`
+    // Keep `deck_items` for backward-compatibility, but also add `items` alias
+    return NextResponse.json({ ...deck, items: (deck as any)?.deck_items ?? [], is_liked, is_saved });
 }
 
 // PATCH /api/decks/[id] — Update a deck
