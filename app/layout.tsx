@@ -20,8 +20,21 @@ const pacifico = Pacifico({
 });
 
 export const metadata: Metadata = {
-  title: "Voyatri",
-  description: "Voyatri — Discover and explore stunning places in Delhi",
+  title: "Voyatri — Find Your Place",
+  description:
+      "Voyatri asks 'how do you feel?' and gently guides you to places that resonate. Discover, collect, and share travel moments with Decks.",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon.ico", type: "image/x-icon" },
+    ],
+    apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: [
+      { url: "/favicon/favicon.ico" }
+    ],
+  },
+  manifest: "/favicon/site.webmanifest",
 };
 
 export default function RootLayout({
